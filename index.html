@@ -1,0 +1,106 @@
+<html>
+  <head>
+<title>Totally Accurate Battle Simulator</title>
+<style>
+  body { 
+    font-family: Arial, sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  #game-container {
+    flex-grow: 1;
+    background-color: #16213e;
+    border: 2px solid #0f3460;
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  #controls-panel {
+    background-color: #0f3460;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+  }
+  select, button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover, select:hover { background-color: #e94560; }
+  #speed-control {
+    display: flex;
+    align-items: center;
+  }
+  #speed-slider {
+    width: 100px;
+  }
+  .unit {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    transition: all 0.2s linear;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+<div id="game-container"></div>
+<div id="controls-panel">
+  <div class="control-group">
+    <select id="unit-type">
+      <option value="warrior">Warrior</option>
+      <option value="archer">Archer</option>
+      <option value="mage">Mage</option>
+      <option value="healer">Healer</option>
+      <option value="tank">Tank</option>
+      <option value="musketman">Musketman</option>
+    </select>
+    <select id="team-select">
+      <option value="blue">Blue</option>
+      <option value="red">Red</option>
+      <option value="purple">Purple</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <button onclick="togglePlacementMode()">Placement Mode</button>
+    <button onclick="toggleDeleteMode()">Delete Mode</button>
+    <button onclick="toggleHealthbarMode()">Healthbar Mode</button>
+    <button onclick="toggleSelectionMode()">Selection Mode</button>
+  </div>
+  <div class="control-group">
+    <button onclick="applyFormation('line')">Line</button>
+    <button onclick="applyFormation('column')">Column</button>
+    <button onclick="applyFormation('wedge')">Wedge</button>
+    <button onclick="applyFormation('square')">Square</button>
+    <button onclick="applyFormation('circle')">Circle</button>
+  </div>
+  <div class="control-group">
+    <button onclick="startBattle()">Start Battle</button>
+    <div id="speed-control">
+      <label for="speed-slider">Speed:</label>
+      <input type="range" id="speed-slider" min="1" max="20" value="10" onchange="updateSpeed()">
+    </div>
+  </div>
+</div>
+
+<div id="stats-panel"></div>
+<div id="update-message">Game layout updated</div>
+</body></html>
