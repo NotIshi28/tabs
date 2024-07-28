@@ -59,6 +59,105 @@
     align-items: center;
     justify-content: center;
   }
+  .team-indicator {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: absolute;
+    opacity: 0.5;
+  }
+  .blue .team-indicator { background-color: #3498db; }
+  .red .team-indicator { background-color: #e74c3c; }
+  .purple .team-indicator { background-color: #9b59b6; }
+  .weapon-icon {
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 1;
+  }
+  .warrior .weapon-icon { background-image: none; }
+  .warrior .wooden-sword {
+    position: absolute;
+    width: 6px;
+    height: 40px;
+    background-color: #8B4513;
+    border-radius: 1px;
+    transition: all 0.2s linear;
+    z-index: 2;
+  }
+  .warrior .wooden-sword::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 4px;
+    background-color: #D2691E;
+    top: -4px;
+    left: -3px;
+    border-radius: 1px;
+  }
+  .warrior .wooden-sword::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-bottom: 10px solid #8B4513;
+    bottom: -10px;
+    left: 0;
+  }
+  .warrior.attacking .wooden-sword {
+    transform: rotate(90deg);
+  }
+  .mage .wooden-staff {
+    position: absolute;
+    width: 4px;
+    height: 50px;
+    background-color: #8B4513;
+    border-radius: 1px;
+    transition: all 0.2s linear;
+    z-index: 2;
+  }
+  .mage .wooden-staff::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #9932CC;
+    border-radius: 50%;
+    top: -8px;
+    left: -3px;
+    box-shadow: 0 0 5px #9932CC;
+  }
+  .archer .weapon-icon { background-image: none; }
+  .archer .bow {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    border-top: 4px solid #8B4513;
+    border-right: 4px solid #8B4513;
+    border-bottom: 4px solid #8B4513;
+    border-left: none;
+    border-radius: 0 100px 100px 0;
+    transform: rotate(0deg);
+    transition: all 0.2s linear;
+    z-index: 2;
+  }
+  .archer .bow::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 36px;
+    background-color: #F4A460;
+    left: 0px;
+    top: 2px;
+  }
+  .archer.attacking .bow {
+    transform: rotate(-30deg);
+  }
+  
 </style>
 </head>
 <body>
