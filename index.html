@@ -606,5 +606,107 @@ function distance(unit1, unit2) {
   const dy = unit1.offsetTop - unit2.offsetTop;
   return Math.sqrt(dx * dx + dy * dy);
 }
+
+
+function move(unit, dx, dy) {
+  const newX = unit.offsetLeft + dx;
+  const newY = unit.offsetTop + dy;
+  
+  const containerRect = gameContainer.getBoundingClientRect();
+  const unitRect = unit.getBoundingClientRect();
+  
+  const minX = 0;
+  const minY = 0;
+  const maxX = containerRect.width - unitRect.width;
+  const maxY = containerRect.height - unitRect.height;
+  
+  unit.style.left = `${Math.max(minX, Math.min(maxX, newX))}px`;
+  unit.style.top = `${Math.max(minY, Math.min(maxY, newY))}px`;
+
+  if (['warrior', 'mage', 'archer', 'healer', 'tank', 'musketman'].includes(unit.className.split(' ')[1])) {
+    updateWeaponPosition(unit);
+  }
+}
+
+function moveTowards(unit, target) {
+  const speed = unit.speed * (battleSpeed / 10);
+  const angle = Math.atan2(target.offsetTop - unit.offsetTop, target.offsetLeft - unit.offsetLeft);
+  const dx = Math.cos(angle) * speed;
+  const dy = Math.sin(angle) * speed;
+  
+  move(unit, dx, dy);
+  
+  if (dx !== 0 || dy !== 0) {
+    unit.lastDirection = { x: dx, y: dy };
+  }
+}
+
+function updateWeaponPosition(unit) {
+  let weapon, shield;
+  const unitType = unit.className.split(' ')[1];
+  if (unitType === 'warrior') {
+    weapon = unit.querySelector('.wooden-sword');
+  } else if (unitType === 'mage') {
+    weapon = unit.querySelector('.wooden-staff');
+  } else if (unitType === 'archer') {
+    weapon = unit.querySelector('.bow');
+  } else if (unitType === 'healer') {
+    weapon = unit.querySelector('.healing-staff');
+  } else if (unitType === 'tank') {
+    weapon = unit.querySelector('.iron-sword');
+    shield = unit.querySelector('.iron-shield');
+  } else if (unitType === 'musketman') {
+    weapon = unit.querySelector('.musket');
+  }
+
+  if (weapon) {
+    const angle = Math.atan2(unit.lastDirection.y, unit.lastDirection.x);
+    const radius = 20;
+    
+    const weaponX = Math.cos(angle) * radius;
+    const weaponY = Math.sin(angle) * radius;
+    
+    weapon.style.transform = `translate(${weaponX}px, ${weaponY}px) rotate(${angle}rad)`;
+    
+    if (shield) {
+      const shieldX = Math.cos(angle + Math.PI) * radius;
+      const shieldY = Math.sin(angle + Math.PI) * radius;
+      shield.style.transform = `translate(${shieldX}px, ${shieldY}px) rotate(${angle}rad)`;
+    }
+  }
+}
+
+function attack(attacker, defender) {
+  const now = Date.now();
+  if (attacker.attackCooldown && now - attacker.lastAttackTime < attacker.attackCooldown) {
+    return;
+  }
+
+  if (attacker.isRanged && attacker.projectiles > 0) {
+    fireProjectile(attacker, defender, getProjectileClass(attacker), () => {
+      applyDamage(attacker, defender);
+    });
+    attacker.projectiles--;
+    rechargeProjectiles(attacker);
+    animateAttack(attacker);
+  } else if (!attacker.isRanged) {
+    applyDamage(attacker, defender);
+    animateAttack(attacker);
+  }
+
+  attacker.lastAttackTime = now;
+}
+
+function getProjectileClass(unit) {
+  const unitType = unit.className.split(' ')[1];
+  switch (unitType) {
+    case 'mage':
+      return 'mage-projectile';
+    case 'musketman':
+      return 'musket-projectile';
+    default:
+      return 'attack-projectile';
+  }
+}
 </script>
 </body></html>
