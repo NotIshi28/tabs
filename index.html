@@ -503,6 +503,108 @@ function addUnit(x, y) {
   if (['warrior', 'mage', 'archer', 'healer', 'tank', 'musketman'].includes(type)) {
     updateWeaponPosition(unit);
   }
+  unit.addEventListener('mouseover', () => showStats(unit));
+  unit.addEventListener('mouseout', hideStats);
+}
+
+function deleteUnit(unit) {
+  const team = unit.classList.contains('blue') ? 'blue' : unit.classList.contains('red') ? 'red' : 'purple';
+  const index = units[team].indexOf(unit);
+  if (index > -1) {
+    units[team].splice(index, 1);
+  }
+  gameContainer.removeChild(unit);
+}
+
+function showStats(unit) {
+  const statsPanel = document.getElementById('stats-panel');
+  statsPanel.innerHTML = `
+    <h3>${unit.className.split(' ')[1].charAt(0).toUpperCase() + unit.className.split(' ')[1].slice(1)}</h3>
+    <p>Health: ${unit.health}/${unit.maxHealth}</p>
+    <p>Damage: ${unit.damage}</p>
+    <p>Speed: ${unit.speed}</p>
+    <p>Range: ${unit.range}</p>
+    ${unit.healPower ? `<p>Heal Power: ${unit.healPower}</p>` : ''}
+    <p>Team: ${unit.team}</p>
+    <p>Type: ${unit.type === 'M' ? 'Melee' : unit.type === 'R' ? 'Ranged' : 'Support'}</p>
+    ${unit.weapon ? `<p>Weapon: ${unit.weapon}</p>` : ''}
+    ${unit.shield ? `<p>Shield: ${unit.shield}</p>` : ''}
+    ${unit.attackCooldown ? `<p>Attack Cooldown: ${unit.attackCooldown / 1000}s</p>` : ''}
+  `;
+  statsPanel.style.display = 'block';
+}
+
+function hideStats() {
+  document.getElementById('stats-panel').style.display = 'none';
+}
+
+function startBattle() {
+  placementMode = false;
+  deleteMode = false;
+  selectionMode = false;
+  updateModeDisplay();
+
+  battleInterval = setInterval(() => {
+    ['blue', 'red', 'purple'].forEach(team => {
+      units[team].forEach(unit => {
+        const enemies = ['blue', 'red', 'purple'].filter(t => t !== team).flatMap(t => units[t]);
+        const allies = units[team];
+        if (unit.health <= 0) return;
+        
+        if (unit.healPower && unit.projectiles > 0) {
+          const woundedAlly = allies.find(ally => ally.health < ally.maxHealth);
+          if (woundedAlly) {
+            heal(unit, woundedAlly);
+          }
+        } else {
+          const nearestEnemy = findNearestUnit(unit, enemies);
+          if (nearestEnemy) {
+            if (distance(unit, nearestEnemy) <= unit.range) {
+              attack(unit, nearestEnemy);
+            } else {
+              moveTowards(unit, nearestEnemy);
+            }
+          }
+        }
+      });
+    });
+
+    if (checkBattleEnd()) {
+      endBattle();
+    }
+  }, 50);
+}
+
+function checkBattleEnd() {
+  const activeteams = ['blue', 'red', 'purple'].filter(team => units[team].length > 0);
+  return activeteams.length <= 1;
+}
+
+function endBattle() {
+  clearInterval(battleInterval);
+  const winner = ['blue', 'red', 'purple'].find(team => units[team].length > 0) || 'No team';
+  alert(`${winner.charAt(0).toUpperCase() + winner.slice(1)} wins!`);
+  
+  ['blue', 'red', 'purple'].forEach(team => {
+    units[team].forEach(unit => gameContainer.removeChild(unit));
+    units[team] = [];
+  });
+  placementMode = true;
+  deleteMode = false;
+  selectionMode = false;
+  updateModeDisplay();
+}
+
+function findNearestUnit(unit, targets) {
+  return targets.reduce((nearest, target) => 
+    !nearest || distance(unit, target) < distance(unit, nearest) ? target : nearest
+  , null);
+}
+
+function distance(unit1, unit2) {
+  const dx = unit1.offsetLeft - unit2.offsetLeft;
+  const dy = unit1.offsetTop - unit2.offsetTop;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 </script>
 </body></html>
