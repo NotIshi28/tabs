@@ -811,5 +811,89 @@ function applyFormation(formationType) {
     updateWeaponPosition(unit);
   });
 }
+
+function getLineFormation(unitCount, centerX, centerY) {
+  const spacing = 50;
+  const totalWidth = (unitCount - 1) * spacing;
+  const startX = centerX - totalWidth / 2;
+  return Array.from({ length: unitCount }, (_, i) => ({
+    x: startX + i * spacing,
+    y: centerY
+  }));
+}
+
+function getColumnFormation(unitCount, centerX, centerY) {
+  const spacing = 50;
+  const totalHeight = (unitCount - 1) *
+  spacing;
+  const startY = centerY - totalHeight / 2;
+  return Array.from({ length: unitCount }, (_, i) => ({
+    x: centerX,
+    y: startY + i * spacing
+  }));
+}
+
+function getWedgeFormation(unitCount, centerX, centerY) {
+  const spacing = 50;
+  const rows = Math.ceil(Math.sqrt(unitCount * 2));
+  let positions = [];
+  let currentY = centerY;
+  let unitsInRow = 1;
+
+  for (let i = 0; i < unitCount; i++) {
+    if (positions.length === unitsInRow) {
+      currentY += spacing;
+      unitsInRow++;
+      positions = [];
+    }
+    const rowWidth = (unitsInRow - 1) * spacing;
+    const x = centerX - rowWidth / 2 + positions.length * spacing;
+    positions.push({ x, y: currentY });
+  }
+
+  return positions;
+}
+
+function getSquareFormation(unitCount, centerX, centerY) {
+  const spacing = 50;
+  const sideLength = Math.ceil(Math.sqrt(unitCount));
+  const totalWidth = (sideLength - 1) * spacing;
+  const startX = centerX - totalWidth / 2;
+  const startY = centerY - totalWidth / 2;
+
+  let positions = [];
+  for (let i = 0; i < sideLength; i++) {
+    for (let j = 0; j < sideLength; j++) {
+      if (positions.length < unitCount) {
+        positions.push({
+          x: startX + j * spacing,
+          y: startY + i * spacing
+        });
+      }
+    }
+  }
+  return positions;
+}
+
+function getCircleFormation(unitCount, centerX, centerY) {
+  const radius = unitCount * 10;
+  return Array.from({ length: unitCount }, (_, i) => {
+    const angle = (i / unitCount) * 2 * Math.PI;
+    return {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle)
+    };
+  });
+}
+
+updateModeDisplay();
+
+const updateMessage = document.getElementById('update-message');
+updateMessage.style.display = 'block';
+setTimeout(() => {
+  updateMessage.style.display = 'none';
+}, 3000);
+
 </script>
-</body></html>
+</body>
+</html>
