@@ -260,6 +260,75 @@
   .musketman.attacking .musket {
     transform: rotate(-10deg);
   }
+  .projectile {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    transition: all 0.5s linear;
+  }
+  .attack-projectile { background-color: #95a5a6; }
+  .mage-projectile { 
+    background-color: #3498db;
+    box-shadow: 0 0 10px #3498db;
+  }
+  .heal-projectile { background-color: #e74c3c; }
+  .musket-projectile {
+    width: 5px;
+    height: 5px;
+    background-color: #2c3e50;
+  }
+  .health-bar {
+    width: 40px;
+    height: 5px;
+    background-color: #27ae60;
+    position: absolute;
+    top: -10px;
+    left: 0;
+    display: none;
+  }
+  .unit:hover .health-bar, .show-health-bars .health-bar {
+    display: block;
+  }
+  .unit-label {
+    position: absolute;
+    bottom: -20px;
+    font-size: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  #stats-panel {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(22, 33, 62, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+  }
+  #update-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: none;
+    animation: fadeOut 3s forwards;
+  }
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .selected {
+    outline: 2px solid #e94560;
+  }
 </style>
 </head>
 <body>
@@ -304,4 +373,34 @@
 
 <div id="stats-panel"></div>
 <div id="update-message">Game layout updated</div>
+
+<script>
+  const gameContainer = document.getElementById('game-container');
+  const units = { blue: [], red: [], purple: [] };
+  let battleSpeed = 10;
+  let placementMode = true;
+  let deleteMode = false;
+  let healthbarMode = false;
+  let selectionMode = false;
+  let selectedUnits = [];
+  let battleInterval;
+  
+  const unitTypes = {
+    warrior: { health: 100, damage: 10, speed: 5, range: 30, isRanged: false, type: 'M', weapon: 'Wooden Sword', attackCooldown: 1000 },
+    archer: { health: 90, damage: 15, speed: 6, range: 150, isRanged: true, type: 'R', weapon: 'Bow' },
+    mage: { health: 60, damage: 20, speed: 4, range: 160, isRanged: true, type: 'R', weapon: 'Wooden Staff' },
+    healer: { health: 70, damage: 5, speed: 5, range: 80, healPower: 10, isRanged: true, type: 'S', weapon: 'Healing Staff' },
+    tank: { health: 150, damage: 20, speed: 3, range: 40, isRanged: false, type: 'M', weapon: 'Iron Sword', shield: 'Iron Shield', attackCooldown: 1000 },
+    musketman: { health: 80, damage: 25, speed: 4, range: 175, isRanged: true, type: 'R', weapon: 'Musket', attackCooldown: 2000 }
+  };
+  
+  function togglePlacementMode() {
+    placementMode = !placementMode;
+    if (placementMode) {
+      deleteMode = false;
+      selectionMode = false;
+    }
+    updateModeDisplay();
+  }
+</script>
 </body></html>
