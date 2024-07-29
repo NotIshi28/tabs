@@ -708,5 +708,108 @@ function getProjectileClass(unit) {
       return 'attack-projectile';
   }
 }
+
+function animateAttack(unit) {
+  const unitType = unit.className.split(' ')[1];
+  unit.classList.add('attacking');
+  setTimeout(() => {
+    unit.classList.remove('attacking');
+  }, 200);
+}
+
+function heal(healer, target) {
+  if (Date.now() - healer.lastHealTime < 5000) return;
+  
+  fireProjectile(healer, target, 'heal-projectile', () => {
+    target.health = Math.min(target.health + healer.healPower, target.maxHealth);
+    updateHealthBar(target);
+  });
+  
+  healer.projectiles--;
+  if (healer.projectiles === 0) {
+    healer.lastHealTime = Date.now();
+    setTimeout(() => {
+      healer.projectiles = 3;
+    }, 5000);
+  }
+}
+
+function fireProjectile(from, to, className, onHit) {
+  const projectile = document.createElement('div');
+  projectile.className = `projectile ${className}`;
+  projectile.style.left = `${from.offsetLeft + 20}px`;
+  projectile.style.top = `${from.offsetTop + 20}px`;
+  gameContainer.appendChild(projectile);
+
+  setTimeout(() => {
+    projectile.style.left = `${to.offsetLeft + 20}px`;
+    projectile.style.top = `${to.offsetTop + 20}px`;
+  }, 50);
+
+  setTimeout(() => {
+    gameContainer.removeChild(projectile);
+    onHit();
+  }, 500);
+}
+
+function applyDamage(attacker, defender) {
+  defender.health -= attacker.damage;
+  updateHealthBar(defender);
+  if (defender.health <= 0) {
+    gameContainer.removeChild(defender);
+    const index = units[defender.team].indexOf(defender);
+    units[defender.team].splice(index, 1);
+  }
+}
+
+function rechargeProjectiles(unit) {
+  setTimeout(() => {
+    unit.projectiles = Math.min(unit.projectiles + 1, 2);
+  }, 2000);
+}
+
+function updateHealthBar(unit) {
+  const healthBar = unit.querySelector('.health-bar');
+  const healthPercentage = (unit.health / unit.maxHealth) * 100;
+  healthBar.style.width = `${healthPercentage}%`;
+}
+
+function updateSpeed() {
+  battleSpeed = document.getElementById('speed-slider').value;
+}
+
+function applyFormation(formationType) {
+  if (selectedUnits.length === 0) return;
+
+  const centerX = selectedUnits.reduce((sum, unit) => sum + unit.offsetLeft, 0) / selectedUnits.length;
+  const centerY = selectedUnits.reduce((sum, unit) => sum + unit.offsetTop, 0) / selectedUnits.length;
+
+  let formationPositions = [];
+
+  switch (formationType) {
+    case 'line':
+      formationPositions = getLineFormation(selectedUnits.length, centerX, centerY);
+      break;
+    case 'column':
+      formationPositions = getColumnFormation(selectedUnits.length, centerX, centerY);
+      break;
+    case 'wedge':
+      formationPositions = getWedgeFormation(selectedUnits.length, centerX, centerY);
+      break;
+    case 'square':
+      formationPositions = getSquareFormation(selectedUnits.length, centerX, centerY);
+      break;
+    case 'circle':
+      formationPositions = getCircleFormation(selectedUnits.length, centerX, centerY);
+      break;
+  }
+
+  selectedUnits.forEach((unit, index) => {
+    const newPosition = formationPositions[index];
+    unit.style.left = `${newPosition.x}px`;
+    unit.style.top = `${newPosition.y}px`;
+    updateWeaponPosition(unit);
+  });
+}
 </script>
 </body></html>
