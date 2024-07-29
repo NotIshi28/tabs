@@ -402,5 +402,107 @@
     }
     updateModeDisplay();
   }
+
+  function toggleDeleteMode() {
+  deleteMode = !deleteMode;
+  if (deleteMode) {
+    placementMode = false;
+    selectionMode = false;
+  }
+  updateModeDisplay();
+}
+
+function toggleHealthbarMode() {
+  healthbarMode = !healthbarMode;
+  gameContainer.classList.toggle('show-health-bars', healthbarMode);
+  updateModeDisplay();
+}
+
+function toggleSelectionMode() {
+  selectionMode = !selectionMode;
+  if (selectionMode) {
+    placementMode = false;
+    deleteMode = false;
+  } else {
+    clearSelection();
+  }
+  updateModeDisplay();
+}
+
+function updateModeDisplay() {
+  gameContainer.style.cursor = placementMode ? 'crosshair' : (deleteMode ? 'not-allowed' : 'default');
+}
+
+gameContainer.addEventListener('click', function(e) {
+  if (placementMode) {
+    const rect = gameContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    addUnit(x, y);
+""} else if (deleteMode) {
+    const clickedUnit = e.target.closest('.unit');
+    if (clickedUnit) {
+      deleteUnit(clickedUnit);
+    }
+  } else if (selectionMode) {
+    const clickedUnit = e.target.closest('.unit');
+    if (clickedUnit) {
+      toggleUnitSelection(clickedUnit);
+    } else {
+      clearSelection();
+    }
+  }
+});
+
+function toggleUnitSelection(unit) {
+  if (unit.classList.contains('selected')) {
+    unit.classList.remove('selected');
+    selectedUnits = selectedUnits.filter(u => u !== unit);
+  } else {
+    unit.classList.add('selected');
+    selectedUnits.push(unit);
+  }
+}
+
+function clearSelection() {
+  selectedUnits.forEach(unit => unit.classList.remove('selected'));
+  selectedUnits = [];
+}
+
+function addUnit(x, y) {
+  const typeSelect = document.getElementById('unit-type');
+  const teamSelect = document.getElementById('team-select');
+  const type = typeSelect.value;
+  const team = teamSelect.value;
+  const unit = document.createElement('div');
+  unit.className =  `unit ${type} ${team}`;
+  unit.innerHTML = `
+    <div class="team-indicator"></div>
+    <div class="weapon-icon"></div>
+    <div class="health-bar"></div>
+    <div class="unit-label">${type.charAt(0).toUpperCase() + type.slice(1)} || ${unitTypes[type].type}</div>
+    ${type === 'warrior' ? '<div class="wooden-sword"></div>' : ''}
+    ${type === 'mage' ? '<div class="wooden-staff"></div>' : ''}
+    ${type === 'archer' ? '<div class="bow"></div>' : ''}
+    ${type === 'healer' ? '<div class="healing-staff"></div>' : ''}
+    ${type === 'tank' ? '<div class="iron-shield"></div><div class="iron-sword"></div>' : ''}
+    ${type === 'musketman' ? '<div class="musket"></div>' : ''}
+  `;
+  unit.style.left = `${x - 20}px`;
+  unit.style.top = `${y - 20}px`;
+  Object.assign(unit, unitTypes[type]);
+  unit.team = team;
+  unit.maxHealth = unit.health;
+  unit.projectiles = type === 'healer' ? 3 : 2;
+  unit.lastHealTime = 0;
+  unit.lastAttackTime = 0;
+  unit.lastDirection = { x: 0, y: 0 };
+  gameContainer.appendChild(unit);
+  units[team].push(unit);
+  updateHealthBar(unit);
+  if (['warrior', 'mage', 'archer', 'healer', 'tank', 'musketman'].includes(type)) {
+    updateWeaponPosition(unit);
+  }
+}
 </script>
 </body></html>
